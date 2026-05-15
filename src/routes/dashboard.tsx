@@ -47,6 +47,27 @@ function Dashboard() {
     },
   });
 
+  const { data: subscription } = useQuery({
+    queryKey: ["active-sub", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_subscriptions")
+        .select("id, status, started_at, expires_at, plan:plans(name, price, currency)")
+        .eq("status", "active")
+        .order("started_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data as {
+        status: string;
+        started_at: string;
+        expires_at: string | null;
+        plan: { name: string; price: number; currency: string } | null;
+      } | null;
+    },
+  });
+
   if (loading || !user) {
     return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
   }
