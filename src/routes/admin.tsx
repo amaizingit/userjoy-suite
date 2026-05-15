@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { LogOut, Shield } from "lucide-react";
 import { toast } from "sonner";
 
@@ -174,6 +175,7 @@ function AdminPage() {
                       </TableCell>
                       <TableCell className="text-right space-x-2">
                         <AssignDialog userId={p.id} plans={plans ?? []} onDone={() => qc.invalidateQueries({ queryKey: ["admin-subs"] })} />
+                        <CredentialsDialog userId={p.id} userEmail={p.email} />
                         {active && (
                           <Button size="sm" variant="outline" onClick={() => cancelSub(active.id)}>
                             Cancel
