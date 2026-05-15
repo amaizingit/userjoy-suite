@@ -76,9 +76,15 @@ function Dashboard() {
     <div className="min-h-screen bg-muted/30">
       <header className="border-b bg-background">
         <div className="container mx-auto flex items-center justify-between px-4 py-4">
-          <div>
-            <Link to="/" className="text-lg font-semibold">Client Portal</Link>
-            <p className="text-xs text-muted-foreground">{user.email}</p>
+          <div className="flex items-center gap-6">
+            <div>
+              <Link to="/" className="text-lg font-semibold">Client Portal</Link>
+              <p className="text-xs text-muted-foreground">{user.email}</p>
+            </div>
+            <nav className="flex gap-4 text-sm">
+              <Link to="/dashboard" className="font-medium">Dashboard</Link>
+              <Link to="/plans" className="text-muted-foreground hover:text-foreground">Plans</Link>
+            </nav>
           </div>
           <Button variant="outline" size="sm" onClick={async () => { await signOut(); navigate({ to: "/" }); }}>
             <LogOut className="h-4 w-4 mr-2" />Sign out
@@ -86,29 +92,64 @@ function Dashboard() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">Your app credentials</h1>
-          <p className="text-sm text-muted-foreground">Login details for the apps assigned to your account.</p>
-        </div>
+      <main className="container mx-auto px-4 py-8 space-y-8">
+        <Card>
+          <CardHeader>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle>Subscription</CardTitle>
+                <CardDescription>Your current plan</CardDescription>
+              </div>
+              <Link to="/plans">
+                <Button variant="outline" size="sm">View plans</Button>
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {subscription && subscription.plan ? (
+              <div className="flex flex-wrap items-center gap-4">
+                <div>
+                  <p className="text-xl font-semibold">{subscription.plan.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {subscription.plan.currency} {Number(subscription.plan.price).toFixed(2)}
+                    {subscription.expires_at && ` · Renews/expires ${new Date(subscription.expires_at).toLocaleDateString()}`}
+                  </p>
+                </div>
+                <Badge>Active</Badge>
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-muted-foreground">No active subscription. Choose a plan to get started.</p>
+                <Link to="/plans"><Button size="sm">Browse plans</Button></Link>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-        {isLoading ? (
-          <p className="text-muted-foreground">Loading credentials…</p>
-        ) : !creds || creds.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <KeyRound className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-              <h3 className="font-semibold">No credentials yet</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Once you purchase a plan, your app login details will appear here.
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            {creds.map((c) => <CredCard key={c.id} cred={c} />)}
+        <div>
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold">Your app credentials</h1>
+            <p className="text-sm text-muted-foreground">Login details for the apps assigned to your account.</p>
           </div>
-        )}
+
+          {isLoading ? (
+            <p className="text-muted-foreground">Loading credentials…</p>
+          ) : !creds || creds.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <KeyRound className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                <h3 className="font-semibold">No credentials yet</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Once you purchase a plan, your app login details will appear here.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {creds.map((c) => <CredCard key={c.id} cred={c} />)}
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );
