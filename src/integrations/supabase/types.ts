@@ -14,7 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      app_credentials: {
+        Row: {
+          app_email: string
+          app_name: string
+          app_password: string
+          app_url: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          notes: string | null
+          plan: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          app_email: string
+          app_name: string
+          app_password: string
+          app_url: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          plan?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          app_email?: string
+          app_name?: string
+          app_password?: string
+          app_url?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          plan?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
