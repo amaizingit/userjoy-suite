@@ -52,8 +52,16 @@ function AuthPage() {
             data: { full_name: parsed.data.fullName ?? "" },
           },
         });
-        if (error) throw error;
-        toast.success("Account created. Check your email to confirm.");
+        if (error) {
+          if ((error as { code?: string }).code === "weak_password") {
+            toast.error("That password has appeared in known data breaches. Please choose a stronger, unique password.");
+          } else {
+            toast.error(error.message);
+          }
+          return;
+        }
+        toast.success("Account created. Check your email to confirm, then sign in.");
+        setMode("login");
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: parsed.data.email,
