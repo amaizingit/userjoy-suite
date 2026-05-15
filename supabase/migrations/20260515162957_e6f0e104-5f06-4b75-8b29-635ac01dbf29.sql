@@ -1,0 +1,1 @@
+UPDATE public.app_credentials SET user_id = 'df3245b3-231a-4eab-af3f-aac94c54869f' WHERE id = '9250a274-065d-4462-8766-9885a4038f19';
