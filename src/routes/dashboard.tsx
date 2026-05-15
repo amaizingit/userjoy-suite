@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { useIsAdmin } from "@/lib/use-admin";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,7 @@ type Cred = {
 function Dashboard() {
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
+  const { data: isAdmin } = useIsAdmin();
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth" });
