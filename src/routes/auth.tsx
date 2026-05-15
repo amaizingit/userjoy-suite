@@ -108,13 +108,31 @@ function AuthPage() {
               {busy ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}
             </Button>
           </form>
-          <button
-            type="button"
-            onClick={() => setMode(mode === "login" ? "signup" : "login")}
-            className="mt-4 w-full text-sm text-muted-foreground hover:text-foreground"
-          >
-            {mode === "login" ? "Need an account? Sign up" : "Already have an account? Sign in"}
-          </button>
+          <div className="mt-4 text-center text-sm">
+            {mode === "login" ? (
+              <>
+                Don't have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => setMode("signup")}
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  Sign up
+                </button>
+              </>
+            ) : (
+              <>
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => setMode("login")}
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  Sign in
+                </button>
+              </>
+            )}
+          </div>
           <div className="mt-6 text-center">
             <Link to="/" className="text-xs text-muted-foreground hover:text-foreground">← Back home</Link>
           </div>
