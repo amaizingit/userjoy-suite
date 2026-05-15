@@ -84,6 +84,7 @@ function Dashboard() {
             <nav className="flex gap-4 text-sm">
               <Link to="/dashboard" className="font-medium">Dashboard</Link>
               <Link to="/plans" className="text-muted-foreground hover:text-foreground">Plans</Link>
+              {isAdmin && <Link to="/admin" className="text-muted-foreground hover:text-foreground">Admin</Link>}
             </nav>
           </div>
           <Button variant="outline" size="sm" onClick={async () => { await signOut(); navigate({ to: "/" }); }}>
