@@ -316,3 +316,148 @@ function AssignDialog({ userId, plans, onDone }: { userId: string; plans: Plan[]
     </Dialog>
   );
 }
+
+type CredRow = {
+  id: string;
+  app_name: string;
+  app_url: string;
+  app_email: string;
+  app_password: string;
+  plan: string | null;
+  expires_at: string | null;
+  notes: string | null;
+};
+
+function CredentialsDialog({ userId, userEmail }: { userId: string; userEmail: string }) {
+  const [open, setOpen] = useState(false);
+  const qc = useQueryClient();
+  const [form, setForm] = useState({
+    app_name: "",
+    app_url: "",
+    app_email: "",
+    app_password: "",
+    plan: "",
+    expires_at: "",
+    notes: "",
+  });
+  const [busy, setBusy] = useState(false);
+
+  const { data: creds, refetch } = useQuery({
+    queryKey: ["admin-creds", userId],
+    enabled: open,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("app_credentials")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as CredRow[];
+    },
+  });
+
+  const reset = () => setForm({ app_name: "", app_url: "", app_email: "", app_password: "", plan: "", expires_at: "", notes: "" });
+
+  const add = async () => {
+    if (!form.app_name || !form.app_url || !form.app_email || !form.app_password) {
+      return toast.error("App name, URL, email and password are required");
+    }
+    setBusy(true);
+    const { error } = await supabase.from("app_credentials").insert({
+      user_id: userId,
+      app_name: form.app_name,
+      app_url: form.app_url,
+      app_email: form.app_email,
+      app_password: form.app_password,
+      plan: form.plan || null,
+      expires_at: form.expires_at ? new Date(form.expires_at).toISOString() : null,
+      notes: form.notes || null,
+    });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Credential added");
+    reset();
+    refetch();
+    qc.invalidateQueries({ queryKey: ["credentials", userId] });
+  };
+
+  const del = async (id: string) => {
+    const { error } = await supabase.from("app_credentials").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Removed");
+    refetch();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline">Credentials</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>App credentials</DialogTitle>
+          <DialogDescription>Manage app login details for {userEmail}.</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium">Existing ({creds?.length ?? 0})</h3>
+          {creds && creds.length > 0 ? (
+            <div className="space-y-2">
+              {creds.map((c) => (
+                <div key={c.id} className="flex items-start justify-between border rounded p-3 text-sm">
+                  <div className="space-y-0.5">
+                    <p className="font-medium">{c.app_name}</p>
+                    <p className="text-muted-foreground text-xs">{c.app_url}</p>
+                    <p className="text-muted-foreground text-xs">{c.app_email}</p>
+                  </div>
+                  <Button size="sm" variant="ghost" onClick={() => del(c.id)}>Delete</Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No credentials yet.</p>
+          )}
+        </div>
+
+        <div className="border-t pt-4 space-y-3">
+          <h3 className="text-sm font-medium">Add new</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>App name *</Label>
+              <Input value={form.app_name} onChange={(e) => setForm({ ...form, app_name: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>App URL *</Label>
+              <Input value={form.app_url} onChange={(e) => setForm({ ...form, app_url: e.target.value })} placeholder="https://..." />
+            </div>
+            <div className="space-y-1.5">
+              <Label>App email *</Label>
+              <Input value={form.app_email} onChange={(e) => setForm({ ...form, app_email: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>App password *</Label>
+              <Input value={form.app_password} onChange={(e) => setForm({ ...form, app_password: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Plan label</Label>
+              <Input value={form.plan} onChange={(e) => setForm({ ...form, plan: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Expires at</Label>
+              <Input type="date" value={form.expires_at} onChange={(e) => setForm({ ...form, expires_at: e.target.value })} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Notes</Label>
+            <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Close</Button>
+          <Button onClick={add} disabled={busy}>{busy ? "Saving…" : "Add credential"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
